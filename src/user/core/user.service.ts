@@ -1,17 +1,24 @@
 import { Injectable } from '@nestjs/common';
 import { UserRepository } from './user.repository';
 import { CreateUserDto } from '../dto/create.user.dto';
+import { ElasticSearch } from 'src/core/elasticsearch/elasticsearch.module';
+import { SearchService } from 'src/core/elasticsearch/elasticsearch.service';
+import { User } from '../model/user.entity';
 
 @Injectable()
 export class UserService {
 
-    constructor(private userRepository: UserRepository){
+    constructor(private userRepository: UserRepository,private searchService: SearchService){
 
     }
 
     async createUser(createUserDto: CreateUserDto){
         try{
-           return this.userRepository.createUser(createUserDto);
+           const newUser: User = await this.userRepository.createUser(createUserDto);
+           const user: User = await this.userRepository.findUserbyEmail(newUser.email)
+           console.log(user)
+           await this.searchService.createUser(createUserDto,user.id);
+        return newUser;
         }catch(err){
 
         }

@@ -33,4 +33,12 @@ export class CategoryService {
 
         }
     }
+
+    async findCategoryNameById(categoryId: bigint){
+        try {
+            return await this.categoryRepository.findCategoryNameById(categoryId)
+        } catch (error) {
+            
+        }
+    }
 }

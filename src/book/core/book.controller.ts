@@ -55,4 +55,15 @@ export class BookController {
         }
 
     }
+    
+    @UseGuards(JWTGuard,RoleGuard)
+    @UseInterceptors(UserInterceptor)
+    @Post('category')
+    async getBooksByCategory(@Req() req:Request){
+        try {
+            return this.bookService.findBookByCategory(req.body.categoryId);
+        } catch (error) {
+            throw error;   
+        }
+    }
 }

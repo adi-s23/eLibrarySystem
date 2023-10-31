@@ -10,6 +10,8 @@ import { SubscribeModule } from './subscribe/subscribe.module';
 import { CartModule } from './cart/cart.module';
 import { TransactionModule } from './transaction/transaction.module';
 import { AuthModule } from './auth/auth.module';
+import { RedisModule } from './core/redis/redis.module';
+import { ElasticSearch } from './core/elasticsearch/elasticsearch.module';
 
 @Module({
   imports: [
@@ -21,7 +23,9 @@ import { AuthModule } from './auth/auth.module';
     SubscribeModule,
     CartModule,
     TransactionModule,
-    AuthModule],
+    AuthModule,
+    RedisModule,
+    ElasticSearch],
   controllers: [AppController],
   providers: [AppService],
 })

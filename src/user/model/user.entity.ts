@@ -2,6 +2,7 @@ import { AllowNull, Column, DataType, HasMany, Model, Table } from "sequelize-ty
 import { Book } from "src/book/model/book.entity";
 import { Cart } from "src/cart/model/cart.entity";
 import { UserRole } from "src/enums/user.role.enum";
+import { UserSession } from "src/session/model/session.entity";
 import { Subscribe } from "src/subscribe/model/subscribe.entity";
 import { BookTransaction,} from "src/transaction/model/transaction.entity";
 
@@ -41,18 +42,6 @@ export class User extends Model{
     password: string;
 
     @Column({
-        type: DataType.STRING,
-        field: 'jwt'
-    })
-    jwt: string;
-
-    @Column({
-        type: DataType.DATE,
-        field: 'last_login'
-    })
-    lastLogin: Date;
-
-    @Column({
         type: DataType.ENUM(...Object.values(UserRole)),
         field: 'role'
     })
@@ -88,6 +77,13 @@ export class User extends Model{
     })
     subscribers: Subscribe[]
 
+    @HasMany(()=> UserSession,{
+        as: 'sessions',
+        foreignKey: {
+            name: 'userId'
+        }
+    })
+    sessions: UserSession[]
 
 }
 

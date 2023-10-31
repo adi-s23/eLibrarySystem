@@ -32,7 +32,8 @@ export class BookRepository{
                 price: createBookDto.price,
                 hideStatus: HideStatus.NOT_HIDDEN
             })
-        newBook.save()
+        await newBook.save()
+        return newBook;
         }catch(err){
             
         }
@@ -45,6 +46,7 @@ export class BookRepository{
                 id: updateBookStatusDto.bookId,
                 createdBy: userId,
             }})
+            
 
 
         }catch(err){
@@ -57,6 +59,17 @@ export class BookRepository{
             return await this.db.Book.findByPk(bookId);
         }catch(err){
             throw err;
+        }
+    }
+
+    async findBooksByCategory(categoryId: bigint){
+        try {
+            return await this.db.Book.findAll({where:{
+                categoryId: categoryId
+            }, 
+        raw: true})
+        } catch (error) {
+            throw error;
         }
     }
 

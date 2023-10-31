@@ -23,4 +23,8 @@ export class CategoryRepository{
         return await this.db.Category.findAll();
     }
 
+    async findCategoryNameById(categoryId: bigint){
+        return await this.db.Category.findByPk(categoryId).then((category)=> category.name);
+    }
+
 }

@@ -13,7 +13,7 @@ export class UserRepository {
 
     }
 
-    async createUser(createUserDto: CreateUserDto){
+    async createUser(createUserDto: CreateUserDto): Promise<User>{
         
         const user: User = await new this.db.User({
             name: createUserDto.name,
@@ -21,7 +21,8 @@ export class UserRepository {
             password: createUserDto.password,
             role: createUserDto.role
         })
-        user.save();
+        await user.save();
+        return user;
 
     }
 

@@ -17,14 +17,15 @@ export class TransactionRepository {
 
     }
 
-    async createTransaction(createTransactionDto: TransactionCreateDto) {
+    async createTransaction(createTransactionDto: TransactionCreateDto):Promise<BookTransaction> {
         try {
-            await this.db.BookTransaction.create({
+            const bookTxn: BookTransaction = await this.db.BookTransaction.create({
                 txnUserId: createTransactionDto.userId,
                 txnBookId: createTransactionDto.bookId,
                 txnPrice: createTransactionDto.price,
                 txnStatus: createTransactionDto.txnStatus
             })
+            return bookTxn;
         } catch (err) {
 
         }

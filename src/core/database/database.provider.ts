@@ -7,6 +7,8 @@ import { Cart } from 'src/cart/model/cart.entity';
 import { BookTransaction } from 'src/transaction/model/transaction.entity';
 import { Subscribe } from 'src/subscribe/model/subscribe.entity';
 import { SEQUELIZE } from '../constants';
+import { Session } from '@nestjs/common';
+import { UserSession } from 'src/session/model/session.entity';
 
 let sequelize;
 export const databaseProviders = [
@@ -20,7 +22,8 @@ export const databaseProviders = [
         Book, 
         Cart,
         BookTransaction, 
-        Subscribe
+        Subscribe,
+        UserSession
       ]);
       await sequelize.sync({});
       return sequelize.models;

@@ -4,9 +4,10 @@ import { UserController } from './core/user.controller';
 import { UserRepository } from './core/user.repository';
 import { databaseProviders } from 'src/core/database/database.provider';
 import { AuthModule } from 'src/auth/auth.module';
+import { ElasticSearch } from 'src/core/elasticsearch/elasticsearch.module';
 
 @Module({
-  imports: [forwardRef(()=> AuthModule)],
+  imports: [forwardRef(()=> AuthModule),ElasticSearch],
   providers: [UserService,UserRepository,...databaseProviders],
   controllers: [UserController],
   exports: [UserService]

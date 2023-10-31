@@ -1,13 +1,15 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post, Req } from '@nestjs/common';
 import { CreateUserDto } from '../dto/create.user.dto';
 import { UserService } from './user.service';
 import { AuthService } from 'src/auth/auth.service';
 import { LoginUserDto } from '../dto/login.user.dto';
+import { Request } from 'express';
+import { SearchService } from 'src/core/elasticsearch/elasticsearch.service';
 
 @Controller('user')
 export class UserController {
 
-    constructor(private userService: UserService, private authService: AuthService) {
+    constructor(private userService: UserService, private authService: AuthService,private searchService: SearchService) {
 
     }
 
@@ -35,9 +37,14 @@ export class UserController {
         try{
             return this.authService.login(loginUserDto.email,loginUserDto.password);
         }catch(err){
-
+            throw err;
         }
 
+    }
+
+    @Post('search')
+    async searchQuery(@Req() req: Request){
+        return await this.searchService.searchUser(req.body.name)
     }
 
 }
