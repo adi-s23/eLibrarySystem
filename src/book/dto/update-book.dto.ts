@@ -1,14 +1,15 @@
 import { IsInt, IsNotEmpty, IsNumber, IsString } from "class-validator"
 
-export class CreateBookDto {
+export class UpdateBookDto {
+
+    @IsNotEmpty()
+    @IsInt()
+    bookId: bigint
 
     @IsString()
     @IsNotEmpty()
     name: string
 
-    @IsNumber()
-    @IsNotEmpty()
-    categoryId: bigint
 
     @IsNumber()
     @IsNotEmpty()

@@ -9,6 +9,8 @@ import { SearchService } from 'src/core/elasticsearch/elasticsearch.service';
 import { BookService } from 'src/book/core/book.service';
 import { Book } from 'src/book/model/book.entity';
 import { CategoryService } from 'src/category/core/category.service';
+import { BookSchema } from 'src/book/schema/book.schema';
+import { tryCatch } from 'bullmq';
 
 @Injectable()
 export class TransactionService {
@@ -22,15 +24,19 @@ export class TransactionService {
 
     }
 
-    async createTxn(createTransactionDto: TransactionCreateDto){
+    async createTxn(createTransactionDto: TransactionCreateDto): Promise<void>{
+        try {
         const bookTxn: BookTransaction = await this.transationRepository.createTransaction(createTransactionDto);
-        const book: Book = await this.bookService.findBookById(bookTxn.txnBookId)
+        const book: BookSchema = await this.bookService.findBookById(bookTxn.txnBookId)
         const category : string= await this.categoryService.findCategoryNameById(book.categoryId)
         await this.searchService.createTransaction(bookTxn,book,category)
+        } catch (error) {
+            throw error;
+        }
     }
 
-    async UpdateTxnStatus(updateTxnStatusDto: UpdateTxnStatusDto){
-            let t:Transaction;
+    async UpdateTxnStatus(updateTxnStatusDto: UpdateTxnStatusDto): Promise<void>{
+        let t:Transaction;
         try{
             t=await this.transationRepository.createSequelizeTxn();
             await this.transationRepository.updateTransaction(updateTxnStatusDto,{transaction: t});

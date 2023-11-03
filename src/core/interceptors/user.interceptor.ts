@@ -7,11 +7,15 @@ export class UserInterceptor implements NestInterceptor {
     context: ExecutionContext,
     callHandler: CallHandler,
   ): Observable<any> {
-    const req = context.switchToHttp().getRequest();
+    try {
+      const req = context.switchToHttp().getRequest();
 
-    req.body.userId = req.user.sub;
+      req.body.userId = req.user.sub;
 
-    return callHandler.handle();
+      return callHandler.handle();
+    } catch (err) {
+      throw err;
+    }
   }
 
 }

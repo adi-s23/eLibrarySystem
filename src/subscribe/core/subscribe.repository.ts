@@ -15,7 +15,7 @@ export class SubscribeRepository {
 
     }
 
-    async createSubscription(txnId: bigint, updateTxnStatusDto: UpdateTxnStatusDto, option?: DataBaseQueryOptions) {
+    async createSubscription(txnId: bigint, updateTxnStatusDto: UpdateTxnStatusDto, option?: DataBaseQueryOptions): Promise<void> {
         try {
             await this.db.Subscribe.create({
                 subscribedUserId: updateTxnStatusDto.userId,
@@ -31,12 +31,13 @@ export class SubscribeRepository {
 
     async findAllSubscribe(userId: bigint){
         try{
-            return await this.db.Subscribe.findAll({attributes: {exclude: ['createdAt','updatedAt']},
+            const data = await this.db.Subscribe.findAll({attributes: {exclude: ['createdAt','updatedAt']},
             include: {model: Book,attributes: {exclude: ['createdAt','updatedAt','deletedAt','hideStatus']},required: true},
             where:{
                 subscribedUserId: userId,
                 subscribeStatus: SubscribeStatus.SUBCRIBED
             }})
+            return data;
         }catch(err){
             throw err;
         }
@@ -44,12 +45,13 @@ export class SubscribeRepository {
     
     async findAllUsersSubscribed(bookId: bigint){
         try{
-            return await this.db.Subscribe.findAll({attributes: {exclude: ['createdAt','updatedAt']},
+            const data = await this.db.Subscribe.findAll({attributes: {exclude: ['createdAt','updatedAt']},
             include: {model: User, required: true, attributes: {exclude: ['createdAt','updatedAt','password']}},
             where: {
                 subscribedBookId: bookId,
                 subscribeStatus: SubscribeStatus.SUBCRIBED
             },})
+            return data;
         }catch(err){
             throw err;
         }
@@ -57,10 +59,11 @@ export class SubscribeRepository {
 
     async updateSubscribeStatus(status: SubscribeStatus,userId: bigint, bookId: bigint){
         try{
-            return await this.db.Subscribe.update({subscribeStatus: status},{where:{
+            const data = await this.db.Subscribe.update({subscribeStatus: status},{where:{
                  subscribedBookId: bookId,
                  subscribedUserId: userId,
             }});
+            return data;
         }catch(err){
             throw err;
         }

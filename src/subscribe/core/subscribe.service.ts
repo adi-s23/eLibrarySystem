@@ -21,15 +21,17 @@ export class SubscribeService {
 
     async findAllSubscribeBooks(userId: bigint){
         try{
-           return await this.subscribeRepository.findAllSubscribe(userId);
+           const subsribedBooks = await this.subscribeRepository.findAllSubscribe(userId);
+           return subsribedBooks;
         }catch(err){
-
+            throw err;
         }
     }
 
     async findAllSubscribedUsers(bookId: bigint){
         try{
-            return await this.subscribeRepository.findAllUsersSubscribed(bookId);
+            const subscribedUsers =  await this.subscribeRepository.findAllUsersSubscribed(bookId);
+            return subscribedUsers;
         }catch(err){
             throw err;
         }
@@ -39,7 +41,7 @@ export class SubscribeService {
         try{
             await this.subscribeRepository.updateSubscribeStatus(status,userId,bookId);
         }catch(err){
-
+            throw err;
         }
     }
 }

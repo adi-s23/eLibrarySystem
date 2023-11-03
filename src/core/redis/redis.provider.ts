@@ -5,9 +5,13 @@ export const redisProviders = [
     {
         provide: REDIS_CACHE,
         useFactory: async () => {
-            const redis  = new  RedisService();
-            await redis.buildConnection();
-            return redis;
+            try {
+                const redis = new RedisService();
+                await redis.buildConnection();
+                return redis;
+            } catch (err) {
+                throw err;
+            }
         }
     }
 ]

@@ -7,6 +7,7 @@ import { JWTGuard } from 'src/auth/jwt.guard';
 import { RoleGuard } from 'src/auth/role/role.guard';
 import { UserInterceptor } from 'src/core/interceptors/user.interceptor';
 import { AddToCartDto } from '../dto/add-to-cart.dto';
+import { triggerAsyncId } from 'async_hooks';
 
 @Controller('cart')
 export class CartController {
@@ -14,13 +15,15 @@ export class CartController {
     constructor(private cartService: CartService){
 
     }
+    
     @Roles(UserRole.USER)
     @UseGuards(JWTGuard,RoleGuard)
     @UseInterceptors(UserInterceptor)
     @Get()
     async findCartItemsByUser(@Req() req:Request){
         try{
-        return this.cartService.findCartByUserId(req.body.userId);
+        const cart = await this.cartService.findCartByUserId(req.body.userId);
+        return cart;
         }catch{
             throw new BadRequestException({message: "Error in finding cart"})
         }
@@ -31,11 +34,11 @@ export class CartController {
     @UseGuards(JWTGuard,RoleGuard)
     @UseInterceptors(UserInterceptor)
     @Post()
-    async addBookToCart(@Req() req: Request,@Body() addToCartDto: AddToCartDto){
+    async addBookToCart(@Req() req: Request,@Body() addToCartDto: AddToCartDto): Promise<void>{
         try{
-            this.cartService.addBookToCart(req.body.userId,addToCartDto.bookId);
+            await this.cartService.addBookToCart(req.body.userId,addToCartDto.bookId);
         }catch(err){
-
+            throw new BadRequestException({message: "Error in adding to cart"});
         }
     }
 
@@ -43,13 +46,26 @@ export class CartController {
     @UseGuards(JWTGuard,RoleGuard)
     @UseInterceptors(UserInterceptor)
     @Delete()
-    async deleteBookInCart(@Req() req: Request,@Body() addToCartDto: AddToCartDto){
+    async deleteBookInCart(@Req() req: Request,@Body() addToCartDto: AddToCartDto): Promise<void>{
         try{
-            this.cartService.deleteBookInCart(req.body.userId,addToCartDto.bookId);
+            await this.cartService.deleteBookInCart(req.body.userId,addToCartDto.bookId);
         }catch(err){
-
+            throw err;
         }
     }
+    
+    @Roles(UserRole.USER)
+    @UseGuards(JWTGuard,RoleGuard)
+    @UseInterceptors(UserInterceptor)
+    @Delete('all')
+    async checkOutCart(@Req() req: Request){
+        try {
+            await this.cartService.checkOutCart(req.body.userId);
+        } catch (error) {
+            throw error;
+        }
+    }
+
     
 
 

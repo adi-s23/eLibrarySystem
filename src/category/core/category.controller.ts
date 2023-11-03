@@ -12,28 +12,36 @@ import { AuthGuard } from '@nestjs/passport';
 @Controller('category')
 export class CategoryController {
 
-    constructor(private categoryService: CategoryService){
+    constructor(private categoryService: CategoryService) {
 
     }
 
     @Get()
     @UseGuards(JWTGuard)
-    async getAllCategories(): Promise<Category[]>{
-        return await this.categoryService.getAllCategories();
+    async getAllCategories(): Promise<CategorySchema[]> {
+        try {
+            const categories: CategorySchema[] = await this.categoryService.getAllCategories();
+            return categories;
+        } catch (error) {
+            throw error;
+        }
     }
 
     @Roles(UserRole.ADMIN)
-    @UseGuards(JWTGuard,RoleGuard)
+    @UseGuards(JWTGuard, RoleGuard)
     @Post()
-    async createCategory(@Body() createCategoryDto: CreateCategoryDto) : Promise<string>{
-        
-        if( await this.categoryService.isCategoryExsistByName(createCategoryDto.name)){
-            return "Category Already Exixts";
-        }
-        
-        await this.categoryService.createCategory(createCategoryDto);
-        return "Category Created";
+    async createCategory(@Body() createCategoryDto: CreateCategoryDto): Promise<string> {
 
+        try {
+            const categoryExsists: boolean = await this.categoryService.isCategoryExsistByName(createCategoryDto.name)
+            if (categoryExsists) {
+                return "Category Already Exixts";
+            }
+            await this.categoryService.createCategory(createCategoryDto);
+            return "Category Created";
+        } catch (error) {
+            throw error;
+        }
     }
 
 

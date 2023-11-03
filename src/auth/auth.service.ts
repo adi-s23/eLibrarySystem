@@ -19,6 +19,8 @@ export class AuthService {
     }
 
     async login(email: string, password: string) {
+        try {
+        
         const user: User = await this.userService.findUserByEmail(email);
 
         if (!user) {
@@ -59,13 +61,19 @@ export class AuthService {
             }
         }
 
+        } catch (error) {
+            throw error;
+        }
     }
 
-    async createUser(createUserDto: CreateUserDto) {
-
+    async createUser(createUserDto: CreateUserDto): Promise<void> {
+        try{
         const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
         const newDto: CreateUserDto = { ...createUserDto, password: hashedPassword }
         const newUser = await this.userService.createUser(newDto);
+        }catch(err){
+            throw err;
+        }
 
     }
 } 

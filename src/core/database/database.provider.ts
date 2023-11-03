@@ -15,23 +15,27 @@ export const databaseProviders = [
   {
     provide: SEQUELIZE,
     useFactory: async () => {
-      sequelize = new Sequelize({... new databaseConfig().local,dialect: "postgres"});
-      sequelize.addModels([
-        Category, 
-        User, 
-        Book, 
-        Cart,
-        BookTransaction, 
-        Subscribe,
-        UserSession
-      ]);
-      await sequelize.sync({});
-      return sequelize.models;
+      try {
+        sequelize = new Sequelize({ ... new databaseConfig().local, dialect: "postgres" });
+        sequelize.addModels([
+          Category,
+          User,
+          Book,
+          Cart,
+          BookTransaction,
+          Subscribe,
+          UserSession
+        ]);
+        await sequelize.sync({});
+        return sequelize.models;
+      } catch (err) {
+        throw err;
+      }
     },
   },
   {
     provide: "SQLIZE",
-    useFactory: async() =>{
+    useFactory: async () => {
       return sequelize;
     }
   }

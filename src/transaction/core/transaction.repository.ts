@@ -31,7 +31,7 @@ export class TransactionRepository {
         }
     }
 
-    async updateTransaction(updateTxnStatusDto: UpdateTxnStatusDto, option?: DataBaseQueryOptions) {
+    async updateTransaction(updateTxnStatusDto: UpdateTxnStatusDto, option?: DataBaseQueryOptions): Promise<void> {
         try {
             await this.db.BookTransaction.update({ txnStatus: TransactionStatus.SUCCESFULL }, {
                 where: {
@@ -46,19 +46,24 @@ export class TransactionRepository {
 
     async findByBookAndUser(bookId: bigint, userId: bigint, option?: DataBaseQueryOptions): Promise<BookTransaction> {
         try {
-            return await this.db.BookTransaction.findOne({
+            const bookTxn = await this.db.BookTransaction.findOne({
                 where: {
                     txnUserId: userId,
                     txnBookId: bookId
-                }, ...option
+                }, ...option,raw: true
             })
+            return bookTxn;
         } catch (err) {
-            
+            throw err;
         }
     }
 
-    async createSequelizeTxn() {
-        const transaction: Transaction = await this.sequelize.transaction();
-        return transaction;
+    async createSequelizeTxn() : Promise<Transaction>{
+        try {
+            const transaction: Transaction = await this.sequelize.transaction();
+            return transaction;
+        } catch (error) {
+            throw error;
+        }
     }
 }

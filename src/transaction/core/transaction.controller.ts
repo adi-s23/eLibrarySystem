@@ -9,9 +9,10 @@ import { InitiateTxnReqDto } from '../dto/initiate-txn-req.dto';
 import { BookService } from 'src/book/core/book.service';
 import { Book } from 'src/book/model/book.entity';
 import { TransactionCreateDto } from '../dto/create-transaction.dto';
-import { Request } from 'express';
+import e, { Request } from 'express';
 import { TransactionStatus } from 'src/enums/transaction.status.enum';
 import { UpdateTxnStatusDto } from '../dto/update-transaction.dto';
+import { BookSchema } from 'src/book/schema/book.schema';
 
 @Controller('transaction')
 export class TransactionController {
@@ -26,31 +27,35 @@ export class TransactionController {
     @Post()
     async initializeTransaction(@Req() req: Request, @Body() initiateTxnReqDto: InitiateTxnReqDto): Promise<void> {
         try {
-            const book: Book = await this.bookService.findBookById(initiateTxnReqDto.bookId);
+            const book: BookSchema = await this.bookService.findBookById(initiateTxnReqDto.bookId);
             if (!book) {
-                throw new HttpException("invalid book",HttpStatus.BAD_REQUEST)
+                throw new HttpException("invalid book", HttpStatus.BAD_REQUEST)
             }
             const txn: TransactionCreateDto = new TransactionCreateDto();
             txn.bookId = book.id;
             txn.price = book.price;
             txn.userId = req.body.userId;
             txn.txnStatus = TransactionStatus.PENDING
-            this.transactionService.createTxn(txn);
+            await this.transactionService.createTxn(txn);
 
         } catch (err) {
-
+            throw err;
         }
 
 
     }
 
     @Roles(UserRole.USER)
-    @UseGuards(JWTGuard,RoleGuard)
+    @UseGuards(JWTGuard, RoleGuard)
     @UseInterceptors(UserInterceptor)
     @Patch()
-    async successTransaction(@Req() req:Request,@Body() updateTxnStatusDto:UpdateTxnStatusDto){
+    async successTransaction(@Req() req: Request, @Body() updateTxnStatusDto: UpdateTxnStatusDto): Promise<void> {
+        try {
             updateTxnStatusDto.userId = req.body.userId;
             await this.transactionService.UpdateTxnStatus(updateTxnStatusDto);
+        } catch (error) {
+            throw error;
+        }
     }
 
 }

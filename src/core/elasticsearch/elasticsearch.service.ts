@@ -2,9 +2,12 @@ import { Injectable } from "@nestjs/common";
 import { ElasticsearchService } from "@nestjs/elasticsearch";
 import { CreateBookDto } from "src/book/dto/create-book.dto";
 import { Book } from "src/book/model/book.entity";
+import { BookSchema } from "src/book/schema/book.schema";
 import { SubscribeStatus } from "src/enums/subscribe.status.enum";
 import { BookTransaction } from "src/transaction/model/transaction.entity";
-import { CreateUserDto } from "src/user/dto/create.user.dto";
+
+import { UserSchema } from "src/user/schema/user.schema";
+import { BOOK_INDEX, TRANSACTION_INDEX, USER_INDEX } from "../constants";
 
 @Injectable()
 export class SearchService {
@@ -15,7 +18,7 @@ export class SearchService {
     async searchUser(q: string) {
         try {
             const result = await this.elasticSearchService.search({
-                index: 'user_index',
+                index: USER_INDEX,
                 body: {
                     query: {
                         match: {
@@ -24,36 +27,36 @@ export class SearchService {
                     }
                 }
             })
-            console.log(result);
-            return result;
+            const users = result.hits.hits;
+            return users;
         } catch (err) {
-
+            throw err;
         }
     }
 
-    async createUser(createUserDto: CreateUserDto, userId: bigint) {
+    async createUser(user: UserSchema) {
         try {
             const result = await this.elasticSearchService.index({
-                index: 'user_index',
-                id: userId.toString(),
+                index: USER_INDEX,
+                id: user.id.toString(),
                 document: {
-                    name: createUserDto.name,
-                    email: createUserDto.email,
-                    role: createUserDto.role.toString(),
-                    joined_at: new Date()
+                    name: user.name,
+                    email: user.email,
+                    role: user.role.toString(),
+                    joined_at: user.createdAt
                 }
             })
             console.log("hi" + result);
         } catch (err) {
-
+            throw err;
         }
     }
 
-    async createBook(createBookDto: Book, categoryName: string) {
+    async createBook(createBookDto: BookSchema, categoryName: string) {
         try {
             const result = await this.elasticSearchService.index({
-                index: 'book_index',
-                id: createBookDto.id,
+                index: BOOK_INDEX,
+                id: createBookDto.id.toString(),
                 document: {
                     name: createBookDto.bookName,
                     price: createBookDto.price,
@@ -67,16 +70,16 @@ export class SearchService {
         }
     }
 
-    async createTransaction(bookTxn: BookTransaction, book: Book, category: string) {
+    async createTransaction(bookTxn: BookTransaction, book: BookSchema, category: string) {
         try {
             const result = await this.elasticSearchService.index({
-                index: 'transaction_index',
+                index: TRANSACTION_INDEX,
                 id: bookTxn.id,
                 document: {
                     transaction_id: bookTxn.id,
                     transaction_by: bookTxn.txnUserId,
                     txn_status: bookTxn.txnStatus,
-                    transaction_at: new Date("2023-11-03"),
+                    transaction_at: bookTxn.createdAt,
                     books: [
                         {
                             book_id: bookTxn.txnBookId,
@@ -96,7 +99,7 @@ export class SearchService {
     async updateTransaction(bookTxn: BookTransaction) {
         try {
             const bookDoc = await this.elasticSearchService.get({
-                index: 'transaction_index',
+                index: TRANSACTION_INDEX,
                 id: bookTxn.id
             })
             const txnBody = bookDoc?._source
@@ -105,7 +108,7 @@ export class SearchService {
                         book['subscribe_status'] = SubscribeStatus.SUBCRIBED.toString();                    
                 }
             });
-            txnBody['transaction_at'] = new Date("2023-11-04");
+            txnBody['transaction_at'] = bookTxn.updatedAt;
             txnBody['txn_status'] = bookTxn.txnStatus.toString();
 
             await this.elasticSearchService.index({
@@ -117,6 +120,24 @@ export class SearchService {
 
         } catch (err) {
             throw err;
+        }
+    }
+
+    async updateBookinES(bookObj : BookSchema){
+        try {
+            console.log("fi")
+            const result = await this.elasticSearchService.update({
+                index: BOOK_INDEX,
+                id: bookObj.id.toString(),
+                doc:{
+                    name: bookObj.bookName,
+                    description: bookObj.description,
+                    price: bookObj.price,
+                }
+            }) 
+            console.log(result);
+        } catch (error) {
+            throw error;
         }
     }
 

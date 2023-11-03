@@ -1,52 +1,86 @@
 import { Inject, Injectable } from "@nestjs/common";
-import {Redis} from "ioredis";
+import { Redis } from "ioredis";
 
 @Injectable()
-export class RedisService{
+export class RedisService {
 
     private connection;
 
-    constructor(){
-        
+    constructor() {
+
     }
 
-    async buildConnection(){
-        this.connection=  new Redis();
+    async buildConnection() {
+        try {
+            this.connection = await new Redis();
+        } catch (err) {
+            throw err;
+        }
     }
 
-    async getConnection(){
-        return this.connection;
+    async set(key: string, value: string | number): Promise<void> {
+        try {
+            await this.connection.set(key, value);
+        } catch (error) {
+            throw error;
+        }
     }
 
-    async set(key: string,value: string|number){
-        await this.connection.set(key,value);
+    async hset(key: string, value: object): Promise<void> {
+        try {
+            await this.connection.hset(key, value);
+        } catch (error) {
+            throw error;
+        }
     }
 
-    async hset(key: string,value: object){
-        await this.connection.hset(key,value);
+    async expire(key: string, value: number): Promise<void> {
+        try {
+            await this.connection.expire(key, value);
+        } catch (error) {
+            throw error;
+        }
     }
 
-    async expire(key: string,value: number){
-        await this.connection.expire(key,value);
+    async get(key: string): Promise<string> {
+        try {
+            const value: string = await this.connection.get(key);
+            return value;
+        } catch (err) {
+            throw err;
+        }
     }
 
-    async get(key: string){
-        return await this.connection.get(key);
+    async incr(key: string): Promise<void> {
+        try {
+            await this.connection.incr(key);
+        } catch (error) {
+            throw error;
+        }
     }
 
-    async incr(key: string){
-        await this.connection.incr(key);
+    async del(key: string): Promise<void> {
+        try {
+            await this.connection.del(key);
+        } catch (error) {
+            throw error;
+        }
     }
 
-    async del(key: string){
-        await this.connection.del(key);
+    async hgetall(key: string): Promise<object> {
+        try {
+            const values = await this.connection.hgetall(key);
+            return values;
+        } catch (error) {
+            throw error;
+        }
     }
 
-    async hgetall(key: string){
-        return await this.connection.hgetall(key);
-    }
-
-    async hdel(key: string){
-        await this.connection.hdel(key);
+    async hdel(key: string): Promise<void> {
+        try {
+            await this.connection.hdel(key);
+        } catch (error) {
+            throw error;
+        }
     }
 }

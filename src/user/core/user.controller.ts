@@ -1,10 +1,14 @@
-import { Body, Controller, Post, Req } from '@nestjs/common';
+import { Body, Controller, HttpException, HttpStatus, Post, Req, UseGuards } from '@nestjs/common';
 import { CreateUserDto } from '../dto/create.user.dto';
 import { UserService } from './user.service';
 import { AuthService } from 'src/auth/auth.service';
 import { LoginUserDto } from '../dto/login.user.dto';
 import { Request } from 'express';
 import { SearchService } from 'src/core/elasticsearch/elasticsearch.service';
+import { Roles } from 'src/auth/role/roles.decorator';
+import { UserRole } from 'src/enums/user.role.enum';
+import { JWTGuard } from 'src/auth/jwt.guard';
+import { RoleGuard } from 'src/auth/role/role.guard';
 
 @Controller('user')
 export class UserController {
@@ -19,14 +23,14 @@ export class UserController {
             const alreadyExsists = await this.userService.exsistsByEmail(createUserDto.email);
             console.log(alreadyExsists);
             if (alreadyExsists) {
-                return "User Already Exsists";
+                throw new HttpException("User Already Exsists",HttpStatus.BAD_REQUEST);
             }
 
-            this.authService.createUser(createUserDto);
+            await this.authService.createUser(createUserDto);
             return "Created Successfully";
             
         } catch (err) {
-
+            throw err;
         }
 
     }
@@ -35,16 +39,23 @@ export class UserController {
     async loginUser(@Body() loginUserDto : LoginUserDto){
 
         try{
-            return this.authService.login(loginUserDto.email,loginUserDto.password);
+           const userData = await this.authService.login(loginUserDto.email,loginUserDto.password);
+           return userData;
         }catch(err){
             throw err;
         }
 
     }
-
-    @Post('search')
+    @Roles(UserRole.ADMIN)
+    @UseGuards(JWTGuard,RoleGuard)
+    @Post('searchByName')
     async searchQuery(@Req() req: Request){
-        return await this.searchService.searchUser(req.body.name)
+        try {
+            const users = await this.searchService.searchUser(req.body.name);
+            return users;
+        } catch (error) {
+            throw error;
+        }
     }
 
 }

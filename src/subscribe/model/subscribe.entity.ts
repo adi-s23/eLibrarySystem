@@ -11,7 +11,10 @@ import { User } from "src/user/model/user.entity";
     indexes: [
         {
             fields: ['subscribed_book_id','subscribed_user_id'],
-            type: "UNIQUE"
+            type: "UNIQUE",
+            where: {
+                deletedAt: null
+            }
         },
         {
             fields: ['subscribed_user_id', 'subscribe_status']
